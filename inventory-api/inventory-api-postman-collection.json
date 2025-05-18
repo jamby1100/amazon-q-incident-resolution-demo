@@ -1,0 +1,83 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Inventory API",
+		"description": "Collection for testing the Inventory API Flask application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				},
+				"description": "Basic health check endpoint"
+			},
+			"response": []
+		},
+		{
+			"name": "Add Inventory",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sku\": \"PROD-001\",\n    \"quantity\": 10\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/inventory",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"inventory"
+					]
+				},
+				"description": "Add inventory for a specific SKU"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Inventory by SKU",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/inventory/PROD-001",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"inventory",
+						"PROD-001"
+					]
+				},
+				"description": "Get total inventory for a specific SKU"
+			},
+			"response": []
+		}
+	],
+	"event": [],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string",
+			"description": "Base URL for the Inventory API"
+		}
+	]
+}

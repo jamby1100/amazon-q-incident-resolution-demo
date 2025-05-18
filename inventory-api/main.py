@@ -82,6 +82,23 @@ def add_inventory():
     }), 201
 
 # API endpoint 2: Get total inventory for a specific SKU
+@app.route('/', methods=['GET'])
+def health_check():
+    try:
+        # Test database connection
+        conn = get_db_connection()
+        conn.close()
+        db_status = "healthy"
+    except Exception as e:
+        db_status = f"unhealthy: {str(e)}"
+    
+    return jsonify({
+        "status": "ok",
+        "service": "inventory-api",
+        "database": db_status,
+        "timestamp": datetime.now().isoformat()
+    })
+
 @app.route('/inventory/<sku>', methods=['GET'])
 def get_inventory(sku):
     conn = get_db_connection()
