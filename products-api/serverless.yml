@@ -9,9 +9,23 @@ provider:
   environment:
     PRODUCTS_TABLE: ${self:service}-${sls:stage}-products
     PRODUCTS_BUCKET: ${self:service}-${sls:stage}-images
+  tracing:
+    apiGateway: true
+    lambda: true
+  logs:
+    restApi:
+      accessLogging: true
+      executionLogging: true
+      level: INFO
+      fullExecutionData: true
   iam:
     role:
       statements:
+        - Effect: Allow
+          Action:
+            - xray:PutTraceSegments
+            - xray:PutTelemetryRecords
+          Resource: "*"
         - Effect: Allow
           Action:
             - dynamodb:Query
@@ -23,7 +37,6 @@ provider:
             - dynamodb:BatchGetItem
           Resource:
             - !GetAtt ProductsTable.Arn
-        # S3 permissions
         - Effect: Allow
           Action:
             - s3:PutObject
@@ -58,6 +71,15 @@ functions:
 plugins:
   - serverless-python-requirements
 
+package:
+  exclude:
+    - venv/**
+    - node_modules/**
+
+custom:
+  pythonRequirements:
+    pythonBin: python3
+    
 resources:
   Resources:
     ProductsTable:
@@ -94,3 +116,18 @@ resources:
         Tags:
           - Key: Name
             Value: ${self:service}-images-bucket
+    
+    # Application Insights Monitoring
+    ApplicationInsightsMonitoring:
+      Type: AWS::ApplicationInsights::Application
+      Properties:
+        ResourceGroupName: !Ref ApplicationResourceGroup
+        AutoConfigurationEnabled: true
+    
+    # Resource Group for Application Insights
+    ApplicationResourceGroup:
+      Type: AWS::ResourceGroups::Group
+      Properties:
+        Name: ${self:service}-${sls:stage}-resources
+        ResourceQuery:
+          Type: CLOUDFORMATION_STACK_1_0

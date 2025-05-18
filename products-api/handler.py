@@ -3,6 +3,11 @@ import os
 import uuid
 from gateways.dynamodb_gateway import DynamodbGateway
 from gateways.s3_gateway import S3Gateway
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
+
+# Patch all supported libraries for X-Ray tracing
+patch_all()
 
 def hello(event, context):
     body = {
