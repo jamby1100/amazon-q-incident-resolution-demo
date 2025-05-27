@@ -1,9 +1,34 @@
 import boto3
 import uuid
 from datetime import datetime
+from decimal import Decimal
+import json
 
 class DynamodbGateway:
-    def get_all_items(table_name):
+    @classmethod
+    def convert_floats(cls, obj):
+        if isinstance(obj, float):
+            return Decimal(str(obj))
+        elif isinstance(obj, dict):
+            return {k: cls.convert_floats(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [cls.convert_floats(elem) for elem in obj]
+        else:
+            return obj
+            
+    @classmethod
+    def convert_decimals(cls, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        elif isinstance(obj, dict):
+            return {k: cls.convert_decimals(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [cls.convert_decimals(elem) for elem in obj]
+        else:
+            return obj
+        
+    @classmethod
+    def get_all_items(cls, table_name):
         """
         Retrieves all items from the DynamoDB table using the table name.
         """
@@ -13,11 +38,15 @@ class DynamodbGateway:
 
         # Scan the table to get all items
         response = table.scan()
+        
+        # Convert Decimal values to float for JSON serialization
+        items = cls.convert_decimals(response['Items'])
 
         # Return the items
-        return response['Items']
+        return items
     
-    def create_item(table_name, item_data):
+    @classmethod
+    def create_item(cls, table_name, item_data):
         """
         Creates a new item in the DynamoDB table using the table name.
         """
@@ -32,7 +61,13 @@ class DynamodbGateway:
         if 'createdAt' not in item_data:
             item_data['createdAt'] = datetime.now().isoformat()
         
-        # Put the item in the table
-        response = table.put_item(Item=item_data)
+        # Convert floats to Decimal for DynamoDB
+        dynamo_item = cls.convert_floats(item_data)
         
-        return response, item_data
+        # Put the item in the table
+        response = table.put_item(Item=dynamo_item)
+        
+        # Convert any Decimal values back to float for JSON serialization
+        serializable_item = cls.convert_decimals(item_data)
+        
+        return response, serializable_item

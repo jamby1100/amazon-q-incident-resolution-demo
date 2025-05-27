@@ -131,6 +131,31 @@ def get_inventory(sku):
         "entry_count": count
     })
 
+# API endpoint 3: Get all SKUs with their total stock counts
+@app.route('/inventory', methods=['GET'])
+def get_all_inventory():
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    # Get sum of quantities grouped by SKU
+    cur.execute('''
+        SELECT sku, SUM(quantity) as total_quantity
+        FROM inventory
+        GROUP BY sku
+        ORDER BY sku
+    ''')
+    
+    results = cur.fetchall()
+    inventory_list = [{"sku": row['sku'], "total_quantity": row['total_quantity']} for row in results]
+    
+    cur.close()
+    conn.close()
+    
+    return jsonify({
+        "inventory_count": len(inventory_list),
+        "inventory": inventory_list
+    })
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True, host='0.0.0.0')

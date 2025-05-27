@@ -8,7 +8,8 @@ provider:
   runtime: python3.9
   environment:
     PRODUCTS_TABLE: ${self:service}-${sls:stage}-products
-    PRODUCTS_BUCKET: ${self:service}-${sls:stage}-images
+    PRODUCTS_BUCKET: ${self:service}-${sls:stage}-images-20250527
+    INVENTORY_SERVICE_URL: inventory-alb-2128711399.ap-southeast-1.elb.amazonaws.com
   tracing:
     apiGateway: true
     lambda: true
