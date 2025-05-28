@@ -4,6 +4,7 @@ import os
 import psycopg2
 import psycopg2.extras
 from datetime import datetime
+import time
 
 app = Flask(__name__)
 
@@ -58,6 +59,7 @@ def add_inventory():
     if quantity <= 0:
         return jsonify({"error": "Quantity must be positive"}), 400
     
+    time.sleep(10) # Sleep for 10 seconds
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
